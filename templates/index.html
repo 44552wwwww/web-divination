@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>web占卜 · 五种卜术</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="nav">
+  <button class="active" onclick="switchTool('xiaoliuren')">🖐 小六壬</button>
+  <button onclick="switchTool('meihua')">🌸 梅花易数</button>
+  <button onclick="switchTool('liuyao')">🪙 六爻</button>
+  <button onclick="switchTool('qimen')">🏰 奇门遁甲</button>
+  <button onclick="switchTool('liuren')">🌊 大六壬</button>
+</div>
+<div class="wrap">
+  <div class="hdr"><h1>🔮 卜术占卜馆</h1><p>五种传统占卜方式，按需选择</p></div>
+  <div id="formArea"></div>
+  <div id="loading" class="loading">推算中...</div>
+  <div id="resultArea" class="result-card"></div>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>
