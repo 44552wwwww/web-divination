@@ -8,6 +8,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'scripts'))
 from xiaoliuren import compute as xiaoliuren_compute
 from meihua import compute as meihua_compute
 from liuyao import compute as liuyao_compute
+from qimen import compute as qimen_compute
+from liuren import compute as liuren_compute
 
 app = Flask(__name__)
 
@@ -48,6 +50,33 @@ def api_liuyao():
             data.get('lines', []),
             data.get('question_type', '其他'),
             data.get('sex', '男')
+        )
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+
+@app.route('/api/qimen', methods=['POST'])
+def api_qimen():
+    try:
+        data = request.get_json()
+        result = qimen_compute(
+            int(data.get('year', 2026)), int(data.get('month', 6)),
+            int(data.get('day', 13)), int(data.get('hour', 12)),
+            data.get('q_type', '考试')
+        )
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route('/api/liuren', methods=['POST'])
+def api_liuren():
+    try:
+        data = request.get_json()
+        result = liuren_compute(
+            int(data.get('year', 2026)), int(data.get('month', 6)),
+            int(data.get('day', 13)), int(data.get('hour', 12)),
+            data.get('q_type', '其他')
         )
         return jsonify(result)
     except Exception as e:
