@@ -34,8 +34,8 @@ function renderForm(name) {
     </div>`,
     liuyao: `<div class="form-card">
       <h3 style="color:var(--g)">🪙 六爻 · 铜钱摇卦</h3>
-      <div class="coin-area"><div class="coin" onclick="flipCoin(0)">🪙</div><div class="coin" onclick="flipCoin(1)">🪙</div><div class="coin" onclick="flipCoin(2)">🪙</div></div>
-      <p style="text-align:center;color:#888;font-size:0.8em" id="ly_status">点硬币翻面，然后点"记下这一爻"。摇第1次(共6次)</p>
+      <div id="ly_coins_display" style="text-align:center;font-size:3em;min-height:60px;line-height:60px;">🪙🪙🪙</div>
+      <p style="text-align:center;color:#888;font-size:0.8em" id="ly_status">点「摇」随机生成铜钱，共需6次</p>
       <div style="display:flex;gap:8px;margin:8px 0;flex-wrap:wrap" id="ly_result"></div>
       <button class="btn" id="ly_record" onclick="recordYao()">记下这一爻 (还剩6次)</button>
       <label>问什么事</label><select id="ly_type"><option>考试</option><option>求财</option><option>感情</option><option>健康</option><option>寻人</option><option>其他</option></select>
@@ -101,28 +101,20 @@ async function divineMeihua() {
 }
 
 // ── 六爻 ──
-let lyCoins = [0,0,0], lyCount = 0, lyLines = [];
+let lyCount = 0, lyLines = [];
 
-function initLiuyao() { lyCoins=[0,0,0]; lyCount=0; lyLines=[]; updateCoins(); document.getElementById('ly_record').style.display='block'; document.getElementById('ly_submit').style.display='none'; document.getElementById('ly_result').innerHTML=''; document.getElementById('ly_status').textContent='点硬币翻面，然后点"记下这一爻"。摇第1次(共6次)'; }
-
-function flipCoin(i) { lyCoins[i]=1-lyCoins[i]; updateCoins(); }
-
-function updateCoins() {
-  document.querySelectorAll('.coin').forEach((c,i) => {
-    c.textContent = lyCoins[i] ? '⚈' : '⚀';
-    c.style.background = lyCoins[i] ? 'var(--g)' : 'var(--c2)';
-    c.style.color = lyCoins[i] ? '#1a1a24' : '#aaa';
-  });
-}
+function initLiuyao() { lyCount=0; lyLines=[]; document.getElementById('ly_record').style.display='block'; document.getElementById('ly_submit').style.display='none'; document.getElementById('ly_result').innerHTML=''; document.getElementById('ly_status').textContent='点「摇」开始，共需6次'; document.getElementById('ly_record').textContent='🎲 摇第1次 (共6次)'; if(document.getElementById('ly_coins_display'))document.getElementById('ly_coins_display').textContent='🪙🪙🪙'; }
 
 function recordYao() {
-  const heads = lyCoins.filter(c=>c===1).length;
-  let result = heads===3?'老阳':heads===0?'老阴':heads===2?'少阳':'少阴';
+  const coins=[Math.random()<0.5?0:1, Math.random()<0.5?0:1, Math.random()<0.5?0:1];
+  const heads=coins.filter(c=>c===1).length;
+  const faces=coins.map(c=>c?'⚈':'⚀').join('');
+  let result=heads===3?'老阳':heads===0?'老阴':heads===2?'少阳':'少阴';
   lyLines.push(result); lyCount++;
-  document.getElementById('ly_result').innerHTML += `<span style="padding:4px 8px;background:var(--c2);border-radius:6px;font-size:0.8em">${lyCount}:${result}</span>`;
-  if (lyCount>=6) { document.getElementById('ly_record').style.display='none'; document.getElementById('ly_submit').style.display='block'; document.getElementById('ly_status').textContent='6次完成！点击下方开始占卜'; }
-  else { document.getElementById('ly_status').textContent=`已记下第${lyCount}次。点硬币翻面后点"记下这一爻"。还剩${6-lyCount}次`; }
-  lyCoins=[0,0,0]; updateCoins();
+  if(document.getElementById('ly_coins_display')) document.getElementById('ly_coins_display').textContent=faces;
+  document.getElementById('ly_result').innerHTML+=`<span style="padding:4px 8px;background:var(--c2);border-radius:6px;font-size:0.8em">${lyCount}:${result}</span>`;
+  if(lyCount>=6){ document.getElementById('ly_record').style.display='none'; document.getElementById('ly_submit').style.display='block'; document.getElementById('ly_status').textContent='6次完成！点击下方开始占卜'; }
+  else{ document.getElementById('ly_record').textContent=`🎲 摇第${lyCount+1}次 (共6次)`; document.getElementById('ly_status').textContent=`第${lyCount}次：${result}，还剩${6-lyCount}次`; }
 }
 
 async function divineLiuyao() {
