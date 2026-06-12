@@ -42,7 +42,18 @@ function renderForm(name) {
       <button class="btn" id="ly_submit" onclick="divineLiuyao()" style="display:none">开始占卜</button>
     </div>`,
   };
-  area.innerHTML = forms[name] || '<p style="color:#888;text-align:center;padding:40px">即将推出</p>';
+  const qimenForm = `<div class="form-card">
+      <h3 style="color:var(--g)">🏰 奇门遁甲 · 时家排盘</h3>
+      <div class="row"><div><label>年</label><input id="qm_y" type="number" value="2026"></div><div><label>月</label><input id="qm_m" type="number" value="6"></div><div><label>日</label><input id="qm_d" type="number" value="13"></div><div><label>时</label><input id="qm_h" type="number" value="12"></div></div>
+      <label>问什么事</label><select id="qm_type"><option>考试</option><option>开业</option><option>出行</option><option>求职</option><option>谈判</option><option>求财</option><option>搬家</option></select>
+      <button class="btn" onclick="divineQimen()">排盘</button></div>`;
+  const liurenForm = `<div class="form-card">
+      <h3 style="color:var(--g)">🌊 大六壬 · 课传推算</h3>
+      <div class="row"><div><label>年</label><input id="lr_y" type="number" value="2026"></div><div><label>月</label><input id="lr_m" type="number" value="6"></div><div><label>日</label><input id="lr_d" type="number" value="13"></div><div><label>时</label><input id="lr_h" type="number" value="12"></div></div>
+      <label>问什么事</label><select id="lr_type"><option>纠纷</option><option>感情</option><option>寻人</option><option>合作</option><option>官司</option><option>其他</option></select>
+      <button class="btn" onclick="divineLiuren()">起课</button></div>`;
+  const allForms = {...forms, qimen: qimenForm, liuren: liurenForm};
+  area.innerHTML = allForms[name] || '<p style="color:#888;text-align:center;padding:40px">即将推出</p>';
   if (name === 'liuyao') initLiuyao();
 }
 
@@ -130,5 +141,35 @@ async function divineLiuyao() {
 
 function showLoading() { document.getElementById('loading').classList.add('show'); document.getElementById('resultArea').classList.remove('show'); }
 function hideLoading() { document.getElementById('loading').classList.remove('show'); }
+
+// ── 奇门 ──
+async function divineQimen() {
+  const y=+document.getElementById('qm_y').value,m=+document.getElementById('qm_m').value,d=+document.getElementById('qm_d').value,h=+document.getElementById('qm_h').value,t=document.getElementById('qm_type').value;
+  showLoading();
+  const res=await fetch('/api/qimen',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({year:y,month:m,day:d,hour:h,q_type:t})});
+  const data=await res.json(); hideLoading();
+  if(data.success){
+    const d2=data.data;
+    let gridHtml='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:12px 0">';
+    d2.grid.forEach(g=>{gridHtml+=`<div style="background:var(--c2);padding:8px;border-radius:6px;text-align:center;font-size:0.75em"><b>${g.宫位}宫 ${g.八卦}</b><br>${g.地盘} ${g.天盘星}星<br>${g.人盘门}门 ${g.神盘}</div>`;});
+    gridHtml+='</div>';
+    document.getElementById('resultArea').innerHTML=`<div class="big-verdict">🏰 ${d2.dun_type}${d2.dun_num}局</div><div class="hex-info">时柱: ${d2.shi_gz} | 用神「${d2.yong_men}」落${d2.yong_gong.宫位}宫</div>${gridHtml}<div class="advice">💡 <em>分析：</em>${d2.analysis.replace(/\n/g,'<br>')}</div>`;
+  }else alert(data.error);
+  document.getElementById('resultArea').classList.add('show');
+}
+
+// ── 六壬 ──
+async function divineLiuren() {
+  const y=+document.getElementById('lr_y').value,m=+document.getElementById('lr_m').value,d=+document.getElementById('lr_d').value,h=+document.getElementById('lr_h').value,t=document.getElementById('lr_type').value;
+  showLoading();
+  const res=await fetch('/api/liuren',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({year:y,month:m,day:d,hour:h,q_type:t})});
+  const data=await res.json(); hideLoading();
+  if(data.success){
+    const d2=data.data;
+    let lessons=d2.four_lessons.map(l=>`<p>→ ${l}</p>`).join('');
+    document.getElementById('resultArea').innerHTML=`<div class="big-verdict">🌊 ${d2.ke_shi}</div><div class="hex-info">月将${d2.yue_jiang}加时${d2.shi_zhi} | 日${d2.ri_gan}${d2.ri_zhi}</div><div class="steps">📐 四课：${lessons}</div><div class="poem">三传：<b>${d2.chu_chuan}</b>(${d2.chu_jiang}) → <b>${d2.zhong_chuan}</b>(${d2.zhong_jiang}) → <b>${d2.mo_chuan}</b>(${d2.mo_jiang})</div><div class="advice">💡 <em>分析：</em>${d2.analysis.replace(/\n/g,'<br>')}</div>`;
+  }else alert(data.error);
+  document.getElementById('resultArea').classList.add('show');
+}
 
 renderForm('xiaoliuren');
